@@ -1,148 +1,137 @@
 "use client";
-import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 
 export default function HomePage() {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"],
-  });
-
-  // Parallax effects for that "Deep" feeling
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, -200]);
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 15]);
-
   return (
-    <section ref={containerRef} className="relative min-h-screen flex items-center px-10 overflow-hidden bg-[#F8F9FB] selection:bg-blue-500/10">
+    <section className="relative min-h-screen bg-[#FDFCF8] text-[#1a1a1a] selection:bg-[#c4a484]/30 overflow-hidden">
       
-      {/* ─── DYNAMIC BACKGROUND ORBS ─── */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.2, 1],
-            x: [0, 50, 0],
-            y: [0, -30, 0] 
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-gradient-to-br from-blue-100/40 to-indigo-100/40 rounded-full blur-[140px]" 
-        />
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.3, 1],
-            x: [0, -60, 0],
-            y: [0, 40, 0] 
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-tr from-purple-100/30 to-pink-100/30 rounded-full blur-[120px]" 
-        />
-      </div>
+      {/* ─── VINTAGE OVERLAYS ─── */}
+      {/* Film Grain/Parchment Texture */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-[0.2] pointer-events-none z-10" />
+      
+      {/* Vignette (Darkened Edges) */}
+      <div className="absolute inset-0 bg-radial-gradient(circle, transparent 40%, rgba(43,42,40,0.05) 100%) pointer-events-none z-10" />
 
-      <div className="max-w-[1400px] mx-auto w-full grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-center relative z-10">
+      <div className="relative max-w-6xl mx-auto px-8 py-20 z-20">
         
-        {/* ─── LEFT CONTENT ─── */}
-        <div className="space-y-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-3 px-5 py-2.5 bg-white/60 backdrop-blur-md rounded-full border border-white/50 shadow-sm"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
-              Curation Vol. 01 / 2025
-            </span>
-          </motion.div>
-
-          <div className="space-y-4">
-            <motion.h1 
-              style={{ y: y1 }}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[clamp(60px,8vw,120px)] font-black leading-[0.82] tracking-[-0.07em] text-[#1A1D23]"
-            >
-              The Art of <br /> 
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-500">
-                Storytelling.
-              </span>
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 1 }}
-              className="text-2xl text-slate-400 font-medium max-w-lg leading-snug tracking-tight"
-            >
-              A digital sanctuary where high-fidelity design meets the timeless elegance of the written word.
-            </motion.p>
-          </div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-wrap items-center gap-6"
-          >
-            <Link href="/books" className="group relative px-12 py-6 bg-[#1A1D23] text-white rounded-[24px] font-bold overflow-hidden transition-all active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.1)]">
-              <div className="absolute inset-0 bg-blue-600 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500" />
-              <span className="relative z-10 flex items-center gap-2">
-                Browse Library
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:translate-x-1 transition-transform">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-            </Link>
-            
-            <Link href="/about" className="group text-sm font-black uppercase tracking-[0.2em] text-slate-500 hover:text-blue-600 transition-colors py-4">
-              Our Vision
-              <div className="h-[2px] w-0 group-hover:w-full bg-blue-600 transition-all duration-300" />
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* ─── RIGHT VISUAL (THE "SQUIRCLE") ─── */}
-        <motion.div 
-          style={{ y: y2, rotate }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="relative hidden lg:flex items-center justify-center"
+        {/* ─── LOGO / TOP NAV ─── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex justify-between items-center mb-24"
         >
-          {/* Main Container */}
-          <div className="relative w-[500px] h-[650px] bg-white rounded-[80px] shadow-[0_100px_150px_-50px_rgba(0,0,0,0.12)] border border-white/50 flex items-center justify-center overflow-hidden">
-            
-            {/* Animated Inner Glow */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/20 via-transparent to-purple-50/20" />
-            
-            {/* Minimalist Logo Graphics */}
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute w-[800px] h-[800px] border border-slate-100 rounded-full opacity-50"
-            />
-            
-            <div className="relative z-10 text-center">
-              <span className="text-[220px] font-black text-[#1A1D23] tracking-tighter drop-shadow-2xl">B.</span>
-              <p className="text-sm font-black text-slate-300 uppercase tracking-[0.5em] -mt-10">EST. 2025</p>
-            </div>
-
-            {/* Floating UI Elements */}
-            <motion.div 
-              animate={{ y: [0, -20, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-20 right-10 p-5 bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/50"
-            >
-              <div className="w-8 h-1 bg-blue-500 rounded-full mb-2" />
-              <div className="w-12 h-1 bg-slate-100 rounded-full" />
-            </motion.div>
+          <div className="font-serif italic text-xl tracking-tighter">B.N.</div>
+          <div className="flex gap-8 text-[10px] uppercase tracking-[0.3em] font-medium text-[#8B6F47]">
+            <Link href="/login" className="hover:text-black transition-colors">Archive</Link>
+            <Link href="/cart" className="hover:text-black transition-colors">The Bag</Link>
           </div>
         </motion.div>
+
+        {/* ─── HEADER LINE ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.5 }}
+          className="mb-12 flex items-center gap-6 text-[10px] tracking-[0.5em] uppercase text-[#8B6F47]"
+        >
+          <span className="h-px w-24 bg-[#8B6F47]/30" />
+          Established in the Year 2025
+        </motion.div>
+
+        {/* ─── MAIN TITLE ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-10"
+        >
+          <h1 className="font-serif text-[clamp(64px,10vw,120px)] leading-[0.9] tracking-tighter italic">
+            BookNest
+          </h1>
+          <p className="mt-4 font-serif text-2xl text-[#8B6F47]/80 italic tracking-tight">
+            Curators of Ink & Silence
+          </p>
+        </motion.div>
+
+        {/* ─── DESCRIPTION ─── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 1.5 }}
+          className="max-w-md"
+        >
+          <p className="text-lg text-[#5a5a5a] leading-relaxed font-serif italic mb-12">
+            "A book is a heart that only beats in the chest of another." 
+            We are a small, quiet sanctuary for those who still find solace in the turning of a physical page.
+          </p>
+          
+          {/* ─── ACTIONS ─── */}
+          <div className="flex items-center gap-10">
+            <Link
+              href="/books"
+              className="group relative text-sm font-bold uppercase tracking-[0.2em] pb-2 overflow-hidden"
+            >
+              <span>Enter the Library</span>
+              <span className="absolute bottom-0 left-0 w-full h-[1px] bg-black translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
+            </Link>
+
+            <Link
+              href="/about"
+              className="text-[11px] uppercase tracking-[0.2em] text-[#8B6F47] hover:text-black transition-colors"
+            >
+              Our Philosophy
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* ─── THE SHELF (DYNAMIC VISUAL) ─── */}
+        <div className="mt-32 relative">
+          <div className="absolute bottom-0 w-full h-[2px] bg-[#8B6F47]/20" />
+          
+          <div className="flex items-end gap-[2px]">
+            {[
+              { title: "Philosophy", h: "h-72", c: "#2B2A28" },
+              { title: "Poetry", h: "h-64", c: "#423F3A" },
+              { title: "History", h: "h-80", c: "#1A1918" },
+              { title: "Fiction", h: "h-72", c: "#2B2A28" },
+              { title: "Essays", h: "h-56", c: "#3D3A35" },
+              { title: "Art", h: "h-80", c: "#423F3A" },
+            ].map((book, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1 + i * 0.1, duration: 1 }}
+                whileHover={{ y: -20, scale: 1.02 }}
+                className={`${book.h} w-14 relative cursor-pointer group rounded-t-[4px] shadow-2xl transition-all`}
+                style={{ backgroundColor: book.c }}
+              >
+                {/* Book Spine Text */}
+                <div className="absolute inset-0 flex items-center justify-center p-2 rotate-180 [writing-mode:vertical-lr]">
+                  <span className="text-[10px] text-[#FDFCF8]/60 uppercase tracking-[0.3em] font-medium group-hover:text-white transition-colors">
+                    {book.title}
+                  </span>
+                </div>
+                
+                {/* Gold Foil Accent at top of spine */}
+                <div className="absolute top-4 left-0 w-full h-[1px] bg-[#C2A66D]/30" />
+                <div className="absolute top-6 left-0 w-full h-[1px] bg-[#C2A66D]/30" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* ─── FOOTER NOTE ─── */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.4 }}
+          transition={{ delay: 2 }}
+          className="mt-20 text-[9px] uppercase tracking-[0.4em] text-center italic"
+        >
+          Slow Browsing Encouraged — No Algorithms, Just Soul.
+        </motion.div>
+
       </div>
     </section>
   );

@@ -1,33 +1,31 @@
-import { Inter } from "next/font/google";
+import { Playfair_Display, EB_Garamond, Uncial_Antiqua } from "next/font/google";
 import Navbar from "@/components/common/Navbar";
-import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth";
+import Footer from "@/components/common/Footer";
 import Script from "next/script";
 
-const inter = Inter({ subsets: ["latin"] });
+const uncial = Uncial_Antiqua({ weight: '400', subsets: ["latin"], variable: '--font-scripture' });
+const garamond = EB_Garamond({ subsets: ["latin"], variable: '--font-body' });
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-  let user = null;
-  if (token) user = await verifyToken(token);
-
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${uncial.variable} ${garamond.variable}`}>
       <head>
-        {/* ✅ Using strategy="afterInteractive" stops the parentNode/removeChild error */}
-        <Script 
-          src="https://unpkg.com/@tailwindcss/browser@4" 
-          strategy="afterInteractive"
-        />
+        <Script src="https://unpkg.com/@tailwindcss/browser@4" strategy="afterInteractive" />
       </head>
-      <body className={`${inter.className} bg-[#FBFBFB] text-[#111111] antialiased selection:bg-black selection:text-white`}>
-        <Navbar user={user} />
+      {/* Background is a clean, creamy white (Bone) with no heavy borders */}
+      <body className="bg-[#FAF9F6] text-[#2C241A] antialiased font-body selection:bg-[#C2A66D]/30">
         
-        {/* Everything is contained in a professional 1200px centered box */}
-        <main className="max-w-[1200px] mx-auto px-6 lg:px-10 pt-32 pb-20">
+        {/* Subtle texture only, no vignette or creases */}
+        <div className="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-10 pointer-events-none z-[9999]" />
+        
+        <Navbar />
+        
+        {/* Clean, wide main container */}
+        <main className="relative max-w-7xl mx-auto px-8 sm:px-12 pt-40 pb-32 z-10 min-h-screen">
           {children}
         </main>
+
+        <Footer />
       </body>
     </html>
   );
