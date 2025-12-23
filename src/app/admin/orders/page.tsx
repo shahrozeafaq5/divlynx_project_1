@@ -1,6 +1,8 @@
 import { connectDB } from "@/lib/db";
 import Order from "@/models/Order";
 import AdminOrdersTable from "@/components/admin/AdminOrdersTable";
+import "@/models/User";
+
 
 export default async function AdminOrdersPage() {
   await connectDB();
