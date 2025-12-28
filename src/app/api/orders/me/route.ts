@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Order from "@/models/Order";
 import "@/models/Book"; 
-import { verifyToken } from "@/lib/auth";
+import { verifyToken } from "@/lib/auth.token";
+
 
 export async function GET(req: NextRequest) {
   try {

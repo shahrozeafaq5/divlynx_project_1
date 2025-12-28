@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Cart from "@/models/Cart";
 import "@/models/Book"; 
-import { verifyToken } from "@/lib/auth";
+import { verifyToken } from "@/lib/auth.token";
+
 
 async function getUserId(req: NextRequest) {
   const token = req.cookies.get("token")?.value;

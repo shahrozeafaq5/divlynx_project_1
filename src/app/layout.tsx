@@ -1,4 +1,4 @@
-import { Playfair_Display, EB_Garamond, Uncial_Antiqua } from "next/font/google";
+import { EB_Garamond, Uncial_Antiqua } from "next/font/google";
 import Navbar from "@/components/common/Navbar";
 import Footer from "@/components/common/Footer";
 import Script from "next/script";
@@ -29,13 +29,12 @@ export default function RootLayout({
       </head>
 
       <body className="bg-[#FAF9F6] text-[#2C241A] antialiased font-body selection:bg-[#C2A66D]/30">
-
         {/* Paper texture */}
         <div className="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-10 pointer-events-none z-[9999]" />
 
         <Navbar />
 
-        <main className="relative max-w-7xl mx-auto px-8 sm:px-12 pt-40 pb-32 z-10 min-h-screen">
+        <main className="relative max-w-7xl mx-auto px-4 sm:px-8 pt-32 pb-28 z-10 min-h-screen">
           {children}
         </main>
 

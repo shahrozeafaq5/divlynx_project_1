@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken } from "@/lib/auth.token";
+
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

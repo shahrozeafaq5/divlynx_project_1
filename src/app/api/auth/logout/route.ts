@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export async function POST() {
-  const response = NextResponse.json({ message: "Logged out" });
-  
-  // Clear the token cookie
-  response.cookies.set("token", "", { 
-    httpOnly: true, 
+  const cookieStore = await cookies();
+
+  cookieStore.set("token", "", {
+    httpOnly: true,
     expires: new Date(0),
-    path: "/" 
+    path: "/",
   });
 
-  return response;
+  return NextResponse.json({ message: "Logged out" });
 }

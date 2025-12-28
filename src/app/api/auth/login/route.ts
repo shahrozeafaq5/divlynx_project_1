@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
-import { verifyPassword, generateToken } from "@/lib/auth";
+import { verifyPassword } from "@/lib/auth.server";
+import { generateToken } from "@/lib/auth.token";
+
 
 export async function POST(req: NextRequest) {
   try {

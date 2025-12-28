@@ -2,7 +2,8 @@ import { connectDB } from "@/lib/db";
 import Cart from "@/models/Cart";
 import "@/models/Book";
 import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken } from "@/lib/auth.token";
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import CartItemsClient from "@/components/cart/CartItemsClient";
