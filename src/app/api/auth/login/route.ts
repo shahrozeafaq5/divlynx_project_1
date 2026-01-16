@@ -3,10 +3,15 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { verifyPassword } from "@/lib/auth.server";
 import { generateToken } from "@/lib/auth.token";
+import { isSameOriginRequest } from "@/lib/security";
 
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { email, password } = await req.json();
@@ -53,7 +58,7 @@ export async function POST(req: NextRequest) {
     response.cookies.set("token", token, {
       httpOnly: true, // Prevents XSS attacks
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });

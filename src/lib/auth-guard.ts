@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { verifyToken } from "./auth";
+import { verifyToken } from "./auth.token";
 
 export async function requireAdmin(req: NextRequest) {
   // 1. Try to get token from cookies first (for browser/frontend)
@@ -14,17 +14,17 @@ export async function requireAdmin(req: NextRequest) {
   }
 
   if (!token) {
-    throw new Error("Unauthorized: No token provided");
+    throw new Error("Unauthorized");
   }
 
   const payload = await verifyToken(token);
 
   if (!payload) {
-    throw new Error("Unauthorized: Invalid or expired token");
+    throw new Error("Unauthorized");
   }
 
   if (payload.role !== "admin") {
-    throw new Error("Forbidden: Admin access required");
+    throw new Error("Forbidden");
   }
 
   return payload;

@@ -3,6 +3,21 @@ import { connectDB } from "@/lib/db";
 import Book from "@/models/Book";
 import { BookValidator } from "@/lib/validators";
 import { requireAdmin } from "@/lib/auth-guard";
+import { isSameOriginRequest } from "@/lib/security";
+
+const MAX_LIMIT = 50;
+const MAX_SEARCH_LENGTH = 100;
+const ALLOWED_CATEGORIES = new Set([
+  "philosophy",
+  "poetry",
+  "history",
+  "fiction",
+  "essays",
+]);
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,19 +28,23 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search");
     const category = searchParams.get("category");
     const sort = searchParams.get("sort");
-    const page = Number(searchParams.get("page") || 1);
-    const limit = Number(searchParams.get("limit") || 10);
+    const page = Math.max(1, Number(searchParams.get("page") || 1));
+    const limit = Math.min(
+      MAX_LIMIT,
+      Math.max(1, Number(searchParams.get("limit") || 10))
+    );
 
     const query: any = {};
 
-    if (search) {
+    if (search && search.length <= MAX_SEARCH_LENGTH) {
+      const safeSearch = escapeRegExp(search);
       query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { author: { $regex: search, $options: "i" } },
+        { title: { $regex: safeSearch, $options: "i" } },
+        { author: { $regex: safeSearch, $options: "i" } },
       ];
     }
 
-    if (category) {
+    if (category && ALLOWED_CATEGORIES.has(category)) {
       query.category = category;
     }
 
@@ -58,8 +77,11 @@ export async function GET(req: NextRequest) {
 }
 export async function POST(req: NextRequest) {
   try {
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-    requireAdmin(req);
+    await requireAdmin(req);
 
     await connectDB();
 

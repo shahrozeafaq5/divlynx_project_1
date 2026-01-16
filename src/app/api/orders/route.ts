@@ -5,6 +5,7 @@ import Order from "@/models/Order";
 import Book from "@/models/Book";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth.token";
+import { isSameOriginRequest } from "@/lib/security";
 
 import { Types } from "mongoose";
 
@@ -28,6 +29,10 @@ type PopulatedCartItem = {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     /* ─── AUTH ─── */

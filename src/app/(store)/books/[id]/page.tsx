@@ -43,8 +43,10 @@ export default async function BookDetailPage({ params }: Props) {
                 src={data.image}
                 alt={data.title}
                 fill
+                sizes="(max-width: 768px) 90vw, 40vw"
                 className="object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-700"
-                priority
+                placeholder="blur"
+                blurDataURL="/blur.png"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center font-serif italic text-[#8B6F47]/40">

@@ -1,9 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Book from "@/models/Book";
+import { requireAdmin } from "@/lib/auth-guard";
+import { isSameOriginRequest } from "@/lib/security";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    await requireAdmin(req);
+
     // 1. Establish connection to the Archive
     await connectDB();
     console.log("❧ Archive Connection: Active");
@@ -116,11 +128,18 @@ export async function GET() {
     }, { status: 200 });
 
   } catch (error: any) {
-    console.error("❌ Archival Failure:", error.message);
-    return NextResponse.json({ 
-      success: false, 
-      error: "Archival Process Failed",
-      details: error.message 
-    }, { status: 500 });
+    const status =
+      error?.message === "Unauthorized"
+        ? 401
+        : error?.message === "Forbidden"
+        ? 403
+        : 500;
+
+    console.error("Archival Failure:", error?.message);
+    return NextResponse.json(
+      { success: false, error: "Archival Process Failed" },
+      { status }
+    );
   }
 }
+

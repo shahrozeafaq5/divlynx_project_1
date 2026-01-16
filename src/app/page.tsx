@@ -26,7 +26,7 @@ export default function HomePage() {
            <span className="font-serif italic text-xl tracking-tighter">B.N.</span>
            <div className="flex gap-8 text-[10px] uppercase tracking-[0.3em] font-bold text-[#8B6F47]">
              <Link href="/books" className="hover:text-black transition-colors">Archive</Link>
-             <Link href="/cart" className="hover:text-black transition-colors">The Bag</Link>
+             {/* <Link href="/cart" className="hover:text-black transition-colors">The Bag</Link> */}
            </div>
         </motion.div>
 

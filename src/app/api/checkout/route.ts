@@ -3,10 +3,15 @@ import { connectDB } from "@/lib/db";
 import Cart from "@/models/Cart";
 import Order from "@/models/Order";
 import Book from "@/models/Book"; 
-import { verifyToken } from "@/lib/auth";
+import { verifyToken } from "@/lib/auth.token";
+import { isSameOriginRequest } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
     
     // Ensure Book model is registered

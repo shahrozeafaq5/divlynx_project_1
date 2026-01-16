@@ -4,15 +4,18 @@ import Order from "@/models/Order";
 import User from "@/models/User"; // Explicitly register User schema
 import Book from "@/models/Book"; // Explicitly register Book schema
 import { requireAdmin } from "@/lib/auth-guard";
+import { isSameOriginRequest } from "@/lib/security";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminCheck = await requireAdmin(req);
-    // If requireAdmin returns a response (like 401/403), return it immediately
-    if (adminCheck instanceof NextResponse) return adminCheck;
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    await requireAdmin(req);
 
     const { id } = await params; // Await params for Next.js 16
     const { status } = await req.json();
@@ -30,6 +33,12 @@ export async function PATCH(
 
     return NextResponse.json(updatedOrder);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    const status =
+      error?.message === "Unauthorized"
+        ? 401
+        : error?.message === "Forbidden"
+        ? 403
+        : 400;
+    return NextResponse.json({ error: error.message }, { status });
   }
 }

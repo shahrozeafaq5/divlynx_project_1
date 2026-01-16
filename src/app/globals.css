@@ -1,27 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-primary: #1e40af; /* Deep Blue */
-  --color-brand-secondary: #0ea5e9; /* Sky Blue */
-  --color-brand-dark: #0f172a; /* Slate 900 */
+  /* The Archivist Palette */
+  --color-aesthetic-cream: #FDFCF8;
+  --color-archivist-gold: #8B6F47;
+  --color-ink-black: #2B2A28;
+  --color-archive-red: #722F37;
+  --color-paper-white: #FAF9F6;
 }
 
 @layer base {
   body {
-    @apply bg-[#fcfcfd] text-brand-dark selection:bg-brand-secondary/30;
+    /* This forces the whole site to your aesthetic cream/paper color */
+    background-color: var(--color-aesthetic-cream);
+    color: var(--color-ink-black);
+    @apply selection:bg-archivist-gold/20;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/80 backdrop-blur-md border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300;
+    @apply bg-aesthetic-cream/80 backdrop-blur-md border border-archivist-gold/10 rounded-sm shadow-sm transition-all duration-300;
   }
   
   .input-pro {
-    @apply w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all;
+    @apply w-full px-4 py-3 bg-paper-white border border-archivist-gold/20 font-serif italic focus:bg-white focus:border-archivist-gold outline-none transition-all;
   }
 
   .btn-pro {
-    @apply relative overflow-hidden px-6 py-3 rounded-xl font-bold tracking-tight transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply relative overflow-hidden px-6 py-3 bg-ink-black text-aesthetic-cream font-bold uppercase tracking-widest text-[10px] transition-all active:scale-95 disabled:opacity-50;
   }
 }

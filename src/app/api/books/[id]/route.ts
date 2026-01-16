@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Book from "@/models/Book";
 import { BookValidator } from "@/lib/validators";
+import { isSameOriginRequest } from "@/lib/security";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -29,6 +30,10 @@ export async function GET(_: NextRequest, { params }: Props) {
 
 export async function PUT(req: NextRequest, { params }: Props) {
   try {
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await requireAdmin(req);
 
     const { id } = await params;
@@ -52,13 +57,17 @@ export async function PUT(req: NextRequest, { params }: Props) {
 
     return NextResponse.json(updated);
   } catch (error: any) {
-    const status = error.message.includes("Forbidden") ? 403 : 401;
+    const status = error.message === "Forbidden" ? 403 : 401;
     return NextResponse.json({ error: error.message }, { status });
   }
 }
 
 export async function DELETE(req: NextRequest, { params }: Props) {
   try {
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await requireAdmin(req);
     
     const { id } = await params;
@@ -72,7 +81,7 @@ export async function DELETE(req: NextRequest, { params }: Props) {
 
     return NextResponse.json({ message: "Book deleted" });
   } catch (error: any) {
-    const status = error.message.includes("Forbidden") ? 403 : 401;
+    const status = error.message === "Forbidden" ? 403 : 401;
     return NextResponse.json({ error: error.message }, { status });
   }
 }

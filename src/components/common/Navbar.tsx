@@ -27,12 +27,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 z-[60] w-full bg-[#FDFCF8]/90 backdrop-blur-md border-b border-[#8B6F47]/10">
+    <nav className="fixed top-0 z-[60] w-full bg-[#FDFCF8]/95 backdrop-blur-md border-b border-[#8B6F47]/15">
       <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
 
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-4 group">
-          <div className="w-10 h-10 border border-[#8B6F47]/40 rounded-full flex items-center justify-center group-hover:bg-[#2B2A28] transition">
+          <div className="w-10 h-10 border border-[#8B6F47]/40 rounded-full flex items-center justify-center group-hover:bg-[#2B2A28] transition-all duration-300">
             <span className="text-[#8B6F47] group-hover:text-[#FDFCF8] font-serif font-bold text-lg">
               B
             </span>
@@ -44,9 +44,9 @@ export default function Navbar() {
 
         {/* DESKTOP NAV */}
         <div className="hidden md:flex items-center gap-10">
-          <NavLink href="/books">Archive</NavLink>
+          {/* <NavLink href="/books">Archive</NavLink> */}
           <NavLink href="/books">Books</NavLink>
-          <NavLink href="/about">About</NavLink>
+
 
           {!user && (
             <NavLink href="/login" className="ml-4">
@@ -59,16 +59,16 @@ export default function Navbar() {
               <NavLink href="/orders">My Orders</NavLink>
               <button
                 onClick={logout}
-                className="text-[10px] font-bold uppercase tracking-[0.3em] text-red-600 hover:text-red-800 transition"
+                className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#722F37] hover:text-[#2B2A28] transition-colors"
               >
                 Logout
               </button>
             </>
           )}
-
-          <div className="flex items-center gap-3 pl-6 border-l border-[#8B6F47]/10">
-            <Link href="/cart" className="relative flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em]">
+          <NavLink href="/about">About</NavLink>
+          <div className="flex items-center gap-3 pl-6 border-l border-[#8B6F47]/15">
+            <Link href="/cart" className="relative flex items-center gap-2 group">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#2B2A28] group-hover:text-[#8B6F47] transition-colors">
                 The Bag
               </span>
               {cartCount > 0 && (
@@ -83,7 +83,7 @@ export default function Navbar() {
         {/* MOBILE BUTTON */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden flex flex-col gap-1"
+          className="md:hidden flex flex-col gap-1.5"
         >
           <span className="w-6 h-[1px] bg-[#2B2A28]" />
           <span className="w-6 h-[1px] bg-[#2B2A28]" />
@@ -93,7 +93,7 @@ export default function Navbar() {
 
       {/* MOBILE MENU */}
       {open && (
-        <div className="md:hidden border-t border-[#8B6F47]/10 bg-[#FDFCF8] px-6 py-8 space-y-6">
+        <div className="md:hidden border-t border-[#8B6F47]/10 bg-[#FDFCF8] px-6 py-8 space-y-6 shadow-xl">
           <MobileLink href="/books" onClick={() => setOpen(false)}>
             Archive
           </MobileLink>
@@ -120,7 +120,7 @@ export default function Navbar() {
                   setOpen(false);
                   logout();
                 }}
-                className="block text-sm font-bold uppercase tracking-widest text-red-600"
+                className="block text-sm font-bold uppercase tracking-widest text-[#722F37]"
               >
                 Logout
               </button>
@@ -128,7 +128,7 @@ export default function Navbar() {
           )}
 
           <MobileLink href="/cart" onClick={() => setOpen(false)}>
-            The Bag {cartCount > 0 && `(${cartCount})`}
+            <span className="text-[#2B2A28]">The Bag</span> {cartCount > 0 && <span className="text-[#8B6F47]">({cartCount})</span>}
           </MobileLink>
         </div>
       )}
@@ -150,7 +150,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`text-[10px] font-bold uppercase tracking-[0.3em] text-[#8B6F47] hover:text-[#2B2A28] transition ${className}`}
+      className={`text-[10px] font-bold uppercase tracking-[0.3em] text-[#8B6F47] hover:text-[#2B2A28] transition-colors ${className}`}
     >
       {children}
     </Link>
@@ -170,7 +170,7 @@ function MobileLink({
     <Link
       href={href}
       onClick={onClick}
-      className="block text-sm font-bold uppercase tracking-widest text-[#2B2A28]"
+      className="block text-sm font-bold uppercase tracking-widest text-[#2B2A28] hover:text-[#8B6F47] transition-colors"
     >
       {children}
     </Link>

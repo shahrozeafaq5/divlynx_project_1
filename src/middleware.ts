@@ -6,6 +6,10 @@ import { verifyToken } from "@/lib/auth.token";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
+
   // 1. 🛡️ EXTRA SAFETY: If it's a static file or internal Next.js file, SKIP middleware
   // This prevents the "Unexpected token '<'" error
   if (
@@ -18,6 +22,7 @@ export async function middleware(req: NextRequest) {
 
   // 2. ✅ Allow Public Routes
   const isPublicRoute = 
+    pathname === "/" ||
     pathname === "/login" || 
     pathname === "/register" || 
     pathname.startsWith("/books") ||

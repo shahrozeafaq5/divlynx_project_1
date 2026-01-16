@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { hashPassword } from "@/lib/auth.server";
+import { isSameOriginRequest } from "@/lib/security";
 
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await connectDB();
 
     const { name, email, password } = await req.json();
@@ -31,6 +36,7 @@ export async function POST(req: NextRequest) {
       name,
       email,
       passwordHash,
+      role: "user",
     });
 
     return NextResponse.json({
