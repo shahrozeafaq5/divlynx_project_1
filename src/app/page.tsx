@@ -1,42 +1,50 @@
 "use client";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function HomePage() {
   const containerRef = useRef(null);
+  const [heroLoaded, setHeroLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Fix for potential hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: mounted ? containerRef : undefined,
     offset: ["start start", "end end"],
   });
 
-  // Parallax and Fade animations
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, 200]);
   const titleY = useTransform(scrollYProgress, [0, 0.2], [0, -120]);
   const opacityFade = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
 
+  if (!mounted) return <div className="bg-[#FDFCF8] min-h-screen" />;
+
   return (
-    <main ref={containerRef} className="bg-[#FDFCF8] text-[#2B2A28] selection:bg-[#8B6F47]/20 overflow-x-hidden">
+    <main ref={containerRef} className="bg-[#FDFCF8] text-[#2B2A28] selection:bg-[#8B6F47]/20 overflow-x-hidden min-h-screen">
       
       {/* ─── PERSISTENT VINTAGE OVERLAYS ─── */}
       <div className="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-[0.12] pointer-events-none z-50" />
       <div className="fixed inset-0 pointer-events-none z-40 shadow-[inset_0_0_150px_rgba(0,0,0,0.08)]" />
 
       {/* ─── SECTION 1: THE VESTIBULE (HERO) ─── */}
-      <section className="relative h-screen flex flex-col justify-center px-8 md:px-24 overflow-hidden">
+      <section className="relative h-screen flex flex-col justify-center px-8 md:px-24 overflow-hidden bg-[#FDFCF8]">
         
-        {/* AESTHETIC BACKGROUND IMAGE LAYER */}
+        {/* HERO BACKGROUND IMAGE LAYER */}
         <motion.div style={{ y: heroY }} className="absolute inset-0 z-0">
           <Image
-            /* New Aesthetic: Moody Library Stacks with ladder */
             src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2940&auto=format&fit=crop"
             alt="Moody Library Archive Stacks"
             fill
-            className="object-cover opacity-45 grayscale-[50%] sepia-[15%] contrast-[1.1]"
+            className={`object-cover grayscale-[50%] sepia-[15%] contrast-[1.1] transition-opacity duration-1000 ${heroLoaded ? 'opacity-45' : 'opacity-0'}`}
             priority
+            onLoadingComplete={() => setHeroLoaded(true)}
           />
-          {/* Deepened Gradient to prioritize text legibility */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF8]/95 via-[#FDFCF8]/40 to-[#FDFCF8]" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#FDFCF8]/60 via-transparent to-transparent hidden md:block" />
         </motion.div>
@@ -51,32 +59,36 @@ export default function HomePage() {
         </motion.div>
 
         {/* HERO MAIN CONTENT */}
-        <motion.div style={{ y: titleY }} className="relative z-20">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.5 }}
-            className="flex items-center gap-6 text-[10px] tracking-[0.5em] uppercase text-[#8B6F47] mb-8 font-bold"
-          >
-            <span className="h-px w-20 bg-[#8B6F47]/40" />
-            Curators of Ancient & Modern Thought
-          </motion.div>
-          
-          <h1 className="font-serif text-[clamp(70px,13vw,180px)] leading-[0.8] tracking-tighter italic mb-8 text-[#2B2A28] drop-shadow-[0_4px_12px_rgba(253,252,248,1)]">
-            BookNest
-          </h1>
-          
-          <div className="max-w-xl">
-            <p className="text-2xl md:text-3xl font-serif italic text-[#3D3B38] leading-snug mb-12 drop-shadow-sm">
-              "A library is a place where you can lose your head and find your soul."
-            </p>
-            <Link href="/books" className="inline-block border-2 border-[#2B2A28] px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] text-[#2B2A28] hover:bg-[#2B2A28] hover:text-[#FDFCF8] transition-all duration-700 shadow-sm">
-              Enter the Collection
-            </Link>
-          </div>
-        </motion.div>
+        <AnimatePresence>
+          {heroLoaded && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              style={{ y: titleY }} 
+              className="relative z-20"
+            >
+              <div className="flex items-center gap-6 text-[10px] tracking-[0.5em] uppercase text-[#8B6F47] mb-8 font-bold">
+                <span className="h-px w-20 bg-[#8B6F47]/40" />
+                Curators of Ancient & Modern Thought
+              </div>
+              
+              <h1 className="font-serif text-[clamp(70px,13vw,180px)] leading-[0.8] tracking-tighter italic mb-8 text-[#2B2A28] drop-shadow-[0_4px_12px_rgba(253,252,248,1)]">
+                BookNest
+              </h1>
+              
+              <div className="max-w-xl">
+                <p className="text-2xl md:text-3xl font-serif italic text-[#3D3B38] leading-snug mb-12 drop-shadow-sm">
+                  "A library is a place where you can lose your head and find your soul."
+                </p>
+                <Link href="/books" className="inline-block border-2 border-[#2B2A28] px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] text-[#2B2A28] hover:bg-[#2B2A28] hover:text-[#FDFCF8] transition-all duration-700 shadow-sm">
+                  Enter the Collection
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* ANIMATED SCROLL INDICATOR */}
         <motion.div 
           animate={{ y: [0, 10, 0] }} 
           transition={{ repeat: Infinity, duration: 2 }}
@@ -86,7 +98,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* ─── SECTION 2: THE SHELVES (CATEGORY REVEAL) ─── */}
+      {/* ─── SECTION 2: THE SHELVES ─── */}
       <section className="relative z-10 py-40 px-8 md:px-24 border-y border-[#8B6F47]/10 bg-[#8B6F47]/5">
         <div className="grid lg:grid-cols-2 gap-20 items-center">
           <div>
@@ -128,18 +140,15 @@ export default function HomePage() {
       </section>
 
       {/* ─── SECTION 3: THE LIBRARIAN'S CHOICE ─── */}
-      <section className="relative z-10 py-60 px-8 md:px-24 overflow-hidden">
-        {/* BACKGROUND IMAGE FOR CURATED SECTION */}
+      <section className="relative z-10 py-60 px-8 md:px-24 overflow-hidden bg-[#FDFCF8]">
         <div className="absolute inset-0 z-0">
           <Image
-            /* Aesthetic reading nook image */
-            src="http://googleusercontent.com/image_collection/image_retrieval/4211190670104066442"
-            alt="Cozy reading nook"
+            src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=2940&auto=format&fit=crop"
+            alt="Study Aesthetic"
             fill
             className="object-cover opacity-30 grayscale-[30%] sepia-[10%]"
           />
-          {/* Gradient overlay to fade image out at the bottom and ensure text pop */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF8]/90 via-[#FDFCF8]/60 to-[#FDFCF8]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF8]/95 via-[#FDFCF8]/60 to-[#FDFCF8]" />
         </div>
 
         <motion.div 
@@ -159,7 +168,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* ─── SECTION 4: CORRESPONDENCE & MEMBERSHIP ─── */}
+      {/* ─── SECTION 4: CONTACT & MEMBERSHIP ─── */}
       <section className="relative z-10 bg-[#1a1918] py-32 px-8 md:px-24 overflow-hidden">
         <div className="absolute top-0 right-0 font-scripture text-[20rem] text-[#FDFCF8]/5 select-none pointer-events-none translate-x-1/2 -translate-y-1/4">
           ❦
@@ -191,12 +200,7 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          <motion.div
-            whileInView={{ opacity: 1, y: 0 }}
-            initial={{ opacity: 0, y: 30 }}
-            viewport={{ once: true }}
-            className="bg-[#2B2A28] p-10 md:p-16 border border-[#FDFCF8]/5 relative"
-          >
+          <div className="bg-[#2B2A28] p-10 md:p-16 border border-[#FDFCF8]/5 relative z-10">
             <h4 className="text-[11px] uppercase tracking-[0.4em] text-[#8B6F47] mb-6 font-bold">The Membership</h4>
             <p className="font-serif italic text-2xl text-[#FDFCF8] mb-10 leading-snug">
               Receive monthly chronicles of rare acquisitions.
@@ -212,7 +216,7 @@ export default function HomePage() {
                 Affix Signature
               </button>
             </form>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -234,7 +238,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
     </main>
   );
 }

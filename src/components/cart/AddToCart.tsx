@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AddToCart({ bookId }: { bookId: string }) {
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
   const [exists, setExists] = useState(false);
+  const router = useRouter();
 
   // 🔍 Check if book already in cart
   useEffect(() => {
@@ -13,9 +15,9 @@ export default function AddToCart({ bookId }: { bookId: string }) {
 
     async function checkCart() {
       try {
-        const res = await fetch(
-          `/api/cart/contains?bookId=${bookId}`
-        );
+        const res = await fetch(`/api/cart/contains?bookId=${bookId}`, {
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (mounted && data.exists) {
@@ -40,11 +42,18 @@ export default function AddToCart({ bookId }: { bookId: string }) {
       const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ bookId, quantity: 1 }),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to add to cart");
+        if (res.status === 401) {
+          alert("Please sign in to add items to your cart.");
+          router.push("/login");
+          return;
+        }
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to add to cart");
       }
 
       setAdded(true);

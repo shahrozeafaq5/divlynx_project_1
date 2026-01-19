@@ -43,6 +43,7 @@ export default function CartItemsClient({
 
     const res = await fetch("/api/orders", {
       method: "POST",
+      credentials: "include",
     });
 
     if (!res.ok) {

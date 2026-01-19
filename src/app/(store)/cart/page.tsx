@@ -14,16 +14,16 @@ async function getCart() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
-  if (!token) return null;
+  if (!token) return { items: null, isAuthed: false };
 
   const payload = await verifyToken(token);
-  if (!payload) return null;
+  if (!payload) return { items: null, isAuthed: false };
 
   const cart = await Cart.findOne({ user: payload.id })
     .populate("items.book")
     .lean();
 
-  if (!cart) return null;
+  if (!cart) return { items: [], isAuthed: true };
 
   // ✅ MANUAL SERIALIZATION (CRITICAL FIX)
   const serializedItems = cart.items.map((item: any) => ({
@@ -36,16 +36,18 @@ async function getCart() {
     },
   }));
 
-  return serializedItems;
+  return { items: serializedItems, isAuthed: true };
 }
 
 export default async function CartPage() {
-  const items = await getCart();
+  const { items, isAuthed } = await getCart();
 
   // 🔐 Protect route
-  if (!items) {
+  if (!isAuthed) {
     redirect("/login");
   }
+
+  const safeItems = items ?? [];
 
   return (
     <div className="max-w-6xl mx-auto min-h-screen">
@@ -68,7 +70,7 @@ export default async function CartPage() {
       </header>
 
       {/* ─── EMPTY STATE ─── */}
-      {items.length === 0 ? (
+      {safeItems.length === 0 ? (
         <div className="py-32 text-center border border-dashed border-[#8B6F47]/20 rounded-sm bg-[#8B6F47]/5">
           <span className="font-scripture text-5xl text-[#8B6F47]/20 mb-6 block">
             ❦
@@ -87,7 +89,7 @@ export default async function CartPage() {
         </div>
       ) : (
         // ✅ NOW SAFE: plain objects only
-        <CartItemsClient initialItems={items} />
+        <CartItemsClient initialItems={safeItems} />
       )}
     </div>
   );

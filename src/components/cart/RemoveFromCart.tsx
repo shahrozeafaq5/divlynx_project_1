@@ -15,6 +15,7 @@ export default function RemoveFromCart({
     await fetch("/api/cart/remove", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ bookId }),
     });
   }

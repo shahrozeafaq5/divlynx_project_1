@@ -18,6 +18,7 @@ export default async function BookDetailPage({ params }: Props) {
   if (!book) return notFound();
 
   const data = JSON.parse(JSON.stringify(book));
+  const bookId = data._id.toString();
 
   // ✅ RELATED BOOKS (same category, exclude current)
   const relatedRaw = await Book.find({
@@ -43,10 +44,10 @@ export default async function BookDetailPage({ params }: Props) {
                 src={data.image}
                 alt={data.title}
                 fill
+                priority
+                quality={75}
                 sizes="(max-width: 768px) 90vw, 40vw"
                 className="object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-700"
-                placeholder="blur"
-                blurDataURL="/blur.png"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center font-serif italic text-[#8B6F47]/40">
@@ -90,7 +91,7 @@ export default async function BookDetailPage({ params }: Props) {
             </div>
 
             <div className="min-w-[240px]">
-              <AddToCart bookId={data._id} />
+              <AddToCart bookId={bookId} />
             </div>
           </div>
         </div>
