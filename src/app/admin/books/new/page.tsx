@@ -10,10 +10,12 @@ export default function NewBookPage() {
   const [form, setForm] = useState({
     title: "",
     author: "",
+    image: "",
     price: "",
     stock: "",
     category: "",
   });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -21,16 +23,31 @@ export default function NewBookPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
 
-    await fetch("/api/books", {
+    const payload = {
+      ...form,
+      image: form.image.trim() || undefined,
+      price: Number(form.price),
+      stock: Number(form.stock),
+      category: form.category.toLowerCase().trim(),
+    };
+    if (!payload.image) {
+      delete (payload as { image?: string }).image;
+    }
+
+    const res = await fetch("/api/books", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        price: Number(form.price),
-        stock: Number(form.stock),
-      }),
+      credentials: "include",
+      body: JSON.stringify(payload),
     });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      setError(data?.error?.formErrors?.[0] || data?.error || "Failed to add book.");
+      return;
+    }
 
     router.push("/admin/books");
   }
@@ -63,13 +80,17 @@ export default function NewBookPage() {
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-10">
+          {error && (
+            <p className="text-[#722F37] text-[10px] uppercase tracking-widest font-bold text-center">
+              {error}
+            </p>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             
             {/* TEXT FIELDS */}
             {[
               { label: "Book Title", key: "title", placeholder: "e.g. The Republic" },
               { label: "Author", key: "author", placeholder: "e.g. Plato" },
-              { label: "Category", key: "category", placeholder: "e.g. Philosophy" },
             ].map((field) => (
               <div key={field.key} className={field.key === "title" ? "md:col-span-2" : ""}>
                 <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[#8B6F47] mb-3">
@@ -85,6 +106,40 @@ export default function NewBookPage() {
                 />
               </div>
             ))}
+
+            <div>
+              <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[#8B6F47] mb-3">
+                Category
+              </label>
+              <select
+                required
+                className="w-full bg-transparent border-b border-[#8B6F47]/20 py-3 font-serif italic text-[#2B2A28] outline-none focus:border-[#8B6F47] transition-all"
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              >
+                <option value="" disabled>
+                  Select category
+                </option>
+                <option value="philosophy">Philosophy</option>
+                <option value="poetry">Poetry</option>
+                <option value="history">History</option>
+                <option value="fiction">Fiction</option>
+                <option value="essays">Essays</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[#8B6F47] mb-3">
+                Cover Image URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://..."
+                className="w-full bg-transparent border-b border-[#8B6F47]/20 py-3 font-serif italic text-[#2B2A28] outline-none focus:border-[#8B6F47] transition-all placeholder:text-[#8B6F47]/20"
+                value={form.image}
+                onChange={(e) => setForm({ ...form, image: e.target.value })}
+              />
+            </div>
 
             {/* NUMERIC FIELDS */}
             <div>

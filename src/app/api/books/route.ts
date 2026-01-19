@@ -95,7 +95,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const book = await Book.create(parsed.data);
+    const payload = {
+      ...parsed.data,
+      image: parsed.data.image ?? parsed.data.coverImage,
+    };
+    delete (payload as { coverImage?: string }).coverImage;
+
+    const book = await Book.create(payload);
 
     return NextResponse.json(book, { status: 201 });
   } catch (error: any) {

@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "http", hostname: "googleusercontent.com" },
       { protocol: "https", hostname: "googleusercontent.com" },
+
+      { protocol: "https", hostname: "i0.wp.com" },
     ],
   },
 };

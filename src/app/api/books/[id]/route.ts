@@ -49,11 +49,13 @@ export async function PUT(req: NextRequest, { params }: Props) {
       );
     }
 
-    const updated = await Book.findByIdAndUpdate(
-      id,
-      parsed.data,
-      { new: true }
-    );
+    const payload = {
+      ...parsed.data,
+      image: parsed.data.image ?? parsed.data.coverImage,
+    };
+    delete (payload as { coverImage?: string }).coverImage;
+
+    const updated = await Book.findByIdAndUpdate(id, payload, { new: true });
 
     return NextResponse.json(updated);
   } catch (error: any) {

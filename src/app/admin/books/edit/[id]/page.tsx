@@ -8,6 +8,7 @@ export default function EditBookPage() {
   const router = useRouter();
 
   const [form, setForm] = useState<any>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch(`/api/books/${id}`)
@@ -19,12 +20,28 @@ export default function EditBookPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
 
-    await fetch(`/api/books/${id}`, {
+    const payload = { ...form };
+    if (typeof payload.category === "string") {
+      payload.category = payload.category.toLowerCase().trim();
+    }
+    if (typeof payload.image === "string" && payload.image.trim() === "") {
+      delete (payload as { image?: string }).image;
+    }
+
+    const res = await fetch(`/api/books/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      credentials: "include",
+      body: JSON.stringify(payload),
     });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      setError(data?.error?.formErrors?.[0] || data?.error || "Failed to update book.");
+      return;
+    }
 
     router.push("/admin/books");
   }
@@ -34,7 +51,13 @@ export default function EditBookPage() {
       <h1 className="text-xl font-bold mb-4">Edit Book</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {["title", "author", "category"].map((field) => (
+        {error && (
+          <p className="text-red-700 text-sm font-medium">
+            {error}
+          </p>
+        )}
+
+        {["title", "author"].map((field) => (
           <input
             key={field}
             className="w-full border p-2 rounded"
@@ -44,6 +67,33 @@ export default function EditBookPage() {
             }
           />
         ))}
+
+        <select
+          className="w-full border p-2 rounded"
+          value={form.category || ""}
+          onChange={(e) =>
+            setForm({ ...form, category: e.target.value })
+          }
+        >
+          <option value="" disabled>
+            Select category
+          </option>
+          <option value="philosophy">Philosophy</option>
+          <option value="poetry">Poetry</option>
+          <option value="history">History</option>
+          <option value="fiction">Fiction</option>
+          <option value="essays">Essays</option>
+        </select>
+
+        <input
+          type="url"
+          placeholder="Cover image URL"
+          className="w-full border p-2 rounded"
+          value={form.image || ""}
+          onChange={(e) =>
+            setForm({ ...form, image: e.target.value })
+          }
+        />
 
         <input
           type="number"
