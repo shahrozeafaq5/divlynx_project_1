@@ -3,19 +3,15 @@ import { connectDB } from "@/lib/db";
 import Cart from "@/models/Cart";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth.token";
-
+import { Model } from "mongoose"; // 1. Added Model import
 
 export const dynamic = "force-dynamic";
-
-type CartItem = {
-  quantity?: number;
-};
 
 export async function GET() {
   try {
     await connectDB();
 
-    // ✅ cookies() is async in Next 16
+    // ✅ NEXT 15+ FIX: cookies() is async
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
@@ -34,10 +30,10 @@ export async function GET() {
       return NextResponse.json({ count: 0 });
     }
 
-    const cart = await Cart.findOne({ user: payload.id }).lean();
+    // 2. FIX: Cast Cart to Model<any> to resolve the 'user' TS issue
+    const cart = await (Cart as Model<any>).findOne({ user: payload.id }).lean();
 
-const count = cart?.items?.length ?? 0;
-
+    const count = cart?.items?.length ?? 0;
 
     return NextResponse.json({ count });
   } catch (error) {

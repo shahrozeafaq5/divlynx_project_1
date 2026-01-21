@@ -36,28 +36,38 @@ export default function CartItemsClient({
     window.dispatchEvent(new Event("cart-updated"));
   }
 
-  async function finalizeAcquisition() {
+async function finalizeAcquisition() {
     if (items.length === 0) return;
 
     setLoading(true);
 
-    const res = await fetch("/api/orders", {
-      method: "POST",
-      credentials: "include",
-    });
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
 
-    if (!res.ok) {
+      const data = await res.json();
+
+      if (!res.ok) {
+        setLoading(false);
+        // 🔥 This will now tell you WHY it failed (e.g., "Invalid token" or "Database error")
+        alert(`Error: ${data.error || "Failed to finalize acquisition"}`);
+        return;
+      }
+
+      window.dispatchEvent(new Event("cart-updated"));
+      router.push("/order-success");
+      
+    } catch (err) {
       setLoading(false);
-      alert("Failed to finalize acquisition");
-      return;
+      alert("Network error: Could not connect to the server.");
+      console.error(err);
     }
-
-    // Navbar badge reset (cart cleared on server)
-    window.dispatchEvent(new Event("cart-updated"));
-
-    router.push("/order-success");
   }
-
   return (
     <div className="grid lg:grid-cols-12 gap-16 items-start">
       {/* ITEMS */}
