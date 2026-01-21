@@ -1,15 +1,15 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET not defined");
-}
+const RAW_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = RAW_SECRET ? new TextEncoder().encode(RAW_SECRET) : null;
 
 export async function generateToken(payload: {
   id: string;
   role: "user" | "admin";
 }) {
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET not defined");
+  }
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -19,6 +19,7 @@ export async function generateToken(payload: {
 
 export async function verifyToken(token: string) {
   try {
+    if (!JWT_SECRET) return null;
     const { payload } = await jwtVerify(token, JWT_SECRET);
 
     if (
