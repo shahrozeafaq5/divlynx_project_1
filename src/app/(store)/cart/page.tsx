@@ -7,10 +7,13 @@ import { verifyToken } from "@/lib/auth.token";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import CartItemsClient from "@/components/cart/CartItemsClient";
+export const runtime = "nodejs";
+
 
 async function getCart() {
   try {
-    await connectDB();
+    const conn = await connectDB();
+    if (!conn) return { items: [], isAuthed: true };
 
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
@@ -27,15 +30,17 @@ async function getCart() {
     if (!cart) return { items: [], isAuthed: true };
 
     // Manual serialization for client props.
-    const serializedItems = cart.items.map((item: any) => ({
-      quantity: item.quantity,
-      book: {
-        _id: item.book._id.toString(),
-        title: item.book.title,
-        price: item.book.price,
-        image: item.book.image || "",
-      },
-    }));
+    const serializedItems = cart.items
+      .filter((item: any) => item.book)
+      .map((item: any) => ({
+        quantity: item.quantity,
+        book: {
+          _id: item.book._id.toString(),
+          title: item.book.title,
+          price: item.book.price,
+          image: item.book.image || "",
+        },
+      }));
 
     return { items: serializedItems, isAuthed: true };
   } catch (error) {

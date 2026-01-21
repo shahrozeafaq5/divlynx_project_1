@@ -4,6 +4,8 @@ import AddToCart from "@/components/cart/AddToCart";
 import BookCard from "@/components/books/BookCard";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+export const runtime = "nodejs";
+
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -11,7 +13,8 @@ interface Props {
 
 export default async function BookDetailPage({ params }: Props) {
   try {
-    await connectDB();
+    const conn = await connectDB();
+    if (!conn) return notFound();
 
     const { id } = await params;
 

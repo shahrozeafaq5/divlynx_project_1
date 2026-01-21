@@ -23,7 +23,8 @@ export async function getUserFromToken(req: NextRequest) {
   const payload = await verifyToken(token);
   if (!payload) return null;
 
-  await connectDB();
+  const conn = await connectDB();
+  if (!conn) return null;
 
   const user = await User.findById(payload.id).select(
     "_id name email role"

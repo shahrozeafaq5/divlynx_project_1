@@ -8,6 +8,8 @@ import { verifyToken } from "@/lib/auth.token";
 import { notFound } from "next/navigation";
 import { Types } from "mongoose";
 import OrderStatusAdmin from "@/components/order/OrderStatusAdmin";
+export const runtime = "nodejs";
+
 
 /* ─── TYPES ─── */
 type OrderItem = {
@@ -31,7 +33,8 @@ type OrderDetail = {
 
 async function getOrder(id: string): Promise<OrderDetail | null> {
   try {
-    await connectDB();
+    const conn = await connectDB();
+    if (!conn) return null;
 
     const cookieStore = await cookies(); // Await cookies for Next.js 16
     const token = cookieStore.get("token")?.value;

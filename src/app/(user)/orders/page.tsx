@@ -7,10 +7,14 @@ import { verifyToken } from "@/lib/auth.token";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image"; // ✅ Import Image
+export const runtime = "nodejs";
+
 
 async function getOrders() {
   try {
-    await connectDB();
+    const conn = await connectDB();
+    if (!conn) return [];
+
     const cookieStore = cookies();
     const token = (await cookieStore).get("token")?.value;
 

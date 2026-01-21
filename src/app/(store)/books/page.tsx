@@ -3,6 +3,8 @@ import Book from "@/models/Book";
 import BookCard from "@/components/books/BookCard";
 import BookFilters from "@/components/books/BookFilters";
 import Image from "next/image";
+export const runtime = "nodejs";
+
 
 type SearchParams = {
   q?: string;
@@ -18,7 +20,10 @@ export default async function BooksPage({ searchParams }: Props) {
   let books: any[] = [];
 
   try {
-    await connectDB();
+    const conn = await connectDB();
+    if (!conn) {
+      throw new Error("DB connection unavailable");
+    }
 
     const { q, category, sort } = await searchParams;
     const query: any = {};

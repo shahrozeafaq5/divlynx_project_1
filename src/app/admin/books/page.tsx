@@ -2,10 +2,14 @@ import Link from "next/link";
 import AdminBooksTable from "@/components/admin/AdminBooksTable";
 import { connectDB } from "@/lib/db";
 import Book from "@/models/Book";
+export const runtime = "nodejs";
+
 
 async function getBooks() {
   try {
-    await connectDB();
+    const conn = await connectDB();
+    if (!conn) return [];
+
     const rawBooks = await Book.find({}).sort({ createdAt: -1 }).lean();
     return JSON.parse(JSON.stringify(rawBooks));
   } catch (error) {
