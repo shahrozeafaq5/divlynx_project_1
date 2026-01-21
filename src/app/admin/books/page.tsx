@@ -2,14 +2,31 @@ import Link from "next/link";
 import AdminBooksTable from "@/components/admin/AdminBooksTable";
 
 async function getBooks() {
-  // Use environment variable for the base URL to avoid hardcoding localhost
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/books`, {
-    cache: "no-store",
-  });
+  try {
+    // ✅ RELATIVE fetch — works correctly in Vercel SSR
+    const res = await fetch("/api/books", {
+      cache: "no-store",
+    });
 
-  const data = await res.json();
-  return Array.isArray(data.data) ? data.data : [];
+    // ❗ If API failed or redirected, do NOT parse JSON
+    if (!res.ok) {
+      console.error("AdminBooks fetch failed:", res.status, res.statusText);
+      return [];
+    }
+
+    // ❗ Extra safety: ensure JSON parsing doesn't crash SSR
+    const text = await res.text();
+    try {
+      const data = JSON.parse(text);
+      return Array.isArray(data?.data) ? data.data : [];
+    } catch (err) {
+      console.error("Invalid JSON from /api/books:", text);
+      return [];
+    }
+  } catch (error) {
+    console.error("AdminBooks SSR error:", error);
+    return [];
+  }
 }
 
 export default async function AdminBooksPage() {
@@ -17,8 +34,7 @@ export default async function AdminBooksPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 min-h-screen">
-      
-      {/* ─── HEADER: Clean & Balanced ─── */}
+      {/* ─── HEADER ─── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
         <div>
           <h1 className="font-serif text-4xl text-[#2B2A28] tracking-tight">
@@ -37,20 +53,22 @@ export default async function AdminBooksPage() {
         </Link>
       </div>
 
-      {/* ─── TABLE AREA: Minimalist & Focused ─── */}
+      {/* ─── TABLE ─── */}
       <div className="bg-[#FDFCF8] border border-[#8B6F47]/10 rounded-sm">
         {books.length === 0 ? (
           <div className="py-32 text-center border border-dashed border-[#8B6F47]/20 m-4">
             <p className="font-serif italic text-lg text-[#8B6F47]/60">
               Your archive is currently empty.
             </p>
-            <Link href="/admin/books/new" className="text-xs text-[#2B2A28] underline mt-2 block">
+            <Link
+              href="/admin/books/new"
+              className="text-xs text-[#2B2A28] underline mt-2 block"
+            >
               Create a record
             </Link>
           </div>
         ) : (
-          /* Wrap the table to ensure it doesn't feel cramped */
-          <div className="p-1"> 
+          <div className="p-1">
             <AdminBooksTable books={books} />
           </div>
         )}
