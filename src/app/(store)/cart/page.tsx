@@ -7,6 +7,7 @@ import { verifyToken } from "@/lib/auth.token";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import CartItemsClient from "@/components/cart/CartItemsClient";
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 

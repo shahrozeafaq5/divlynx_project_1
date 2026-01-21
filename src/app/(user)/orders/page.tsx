@@ -8,6 +8,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image"; // ✅ Import Image
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 
 async function getOrders() {

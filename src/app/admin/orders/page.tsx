@@ -3,6 +3,7 @@ import Order from "@/models/Order";
 import AdminOrdersTable from "@/components/admin/AdminOrdersTable";
 import "@/models/User";
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 
 

@@ -5,6 +5,7 @@ import BookCard from "@/components/books/BookCard";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 
 interface Props {

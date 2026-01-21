@@ -1,25 +1,17 @@
 import Link from "next/link";
 import AdminBooksTable from "@/components/admin/AdminBooksTable";
 import { connectDB } from "@/lib/db";
-import Book, { IBook } from "@/models/Book";
-import { Model } from "mongoose";
+import Book from "@/models/Book";
 
 export const runtime = "nodejs";
-// This prevents the "server-side exception" during Vercel builds
 export const dynamic = "force-dynamic";
 
 async function getBooks() {
   try {
-    await connectDB();
+    const conn = await connectDB();
+    if (!conn) return [];
 
-    // Use type casting to fix the "Argument of type '{}' is not assignable" error
-    const rawBooks = await (Book as Model<IBook>)
-      .find({})
-      .sort({ createdAt: -1 })
-      .lean();
-
-    // Serialize MongoDB data (converts ObjectIds and Dates to strings)
-    // to prevent "Plain Object" errors in Client Components
+    const rawBooks = await Book.find({}).sort({ createdAt: -1 }).lean();
     return JSON.parse(JSON.stringify(rawBooks));
   } catch (error) {
     console.error("AdminBooks SSR error:", error);

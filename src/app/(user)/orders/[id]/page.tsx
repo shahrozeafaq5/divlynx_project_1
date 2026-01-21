@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { Types } from "mongoose";
 import OrderStatusAdmin from "@/components/order/OrderStatusAdmin";
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 
 /* ─── TYPES ─── */

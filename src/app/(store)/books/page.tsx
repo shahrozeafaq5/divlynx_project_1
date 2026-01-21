@@ -3,6 +3,7 @@ import Book from "@/models/Book";
 import BookCard from "@/components/books/BookCard";
 import BookFilters from "@/components/books/BookFilters";
 import Image from "next/image";
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 
