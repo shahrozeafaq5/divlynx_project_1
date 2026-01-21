@@ -6,12 +6,9 @@ import Book from "@/models/Book";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth.token";
 import { isSameOriginRequest } from "@/lib/security";
+import { Types, Model } from "mongoose"; // 1. Added Model import
 
-import { Types } from "mongoose";
-
-/* ─────────────────────────────────────────────
-   TYPES
-───────────────────────────────────────────── */
+export const dynamic = "force-dynamic"; // 2. Critical for Vercel
 
 type PopulatedCartItem = {
   book: {
@@ -22,10 +19,6 @@ type PopulatedCartItem = {
   };
   quantity: number;
 };
-
-/* ─────────────────────────────────────────────
-   CREATE ORDER (FINALIZE ACQUISITION)
-───────────────────────────────────────────── */
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,42 +37,38 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = await verifyToken(token);
-    if (!payload) {
+    // 3. Check for payload.id specifically
+    if (!payload || !payload.id) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     /* ─── FETCH CART ─── */
-    const cart = await Cart.findOne({ user: payload.id })
-      .populate("items.book")
+    // 4. FIX: Cast Cart to Model<any> to resolve the TypeScript 'user' error
+    const cart = await (Cart as Model<any>).findOne({ user: payload.id })
+      .populate({ path: "items.book", model: Book }) // Ensure Book model is registered
       .lean();
 
-    if (!cart || cart.items.length === 0) {
-      return NextResponse.json(
-        { error: "Cart is empty" },
-        { status: 400 }
-      );
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
     const items = cart.items as PopulatedCartItem[];
 
     /* ─── VALIDATE & CALCULATE ─── */
     let totalPrice = 0;
-
     for (const item of items) {
-      const book = item.book;
-
-      if (book.stock < item.quantity) {
+      if (!item.book) continue;
+      if (item.book.stock < item.quantity) {
         return NextResponse.json(
-          { error: `Insufficient stock for ${book.title}` },
+          { error: `Insufficient stock for ${item.book.title}` },
           { status: 400 }
         );
       }
-
-      totalPrice += book.price * item.quantity;
+      totalPrice += item.book.price * item.quantity;
     }
 
     /* ─── CREATE ORDER ─── */
-    const order = await Order.create({
+    const order = await (Order as Model<any>).create({
       user: payload.id,
       items: items.map((item) => ({
         book: item.book._id,
@@ -91,14 +80,15 @@ export async function POST(req: NextRequest) {
     });
 
     /* ─── UPDATE STOCK ─── */
-    for (const item of items) {
-      await Book.findByIdAndUpdate(item.book._id, {
+    const stockUpdates = items.map((item) =>
+      (Book as Model<any>).findByIdAndUpdate(item.book._id, {
         $inc: { stock: -item.quantity },
-      });
-    }
+      })
+    );
+    await Promise.all(stockUpdates);
 
     /* ─── CLEAR CART ─── */
-    await Cart.updateOne(
+    await (Cart as Model<any>).updateOne(
       { user: payload.id },
       { $set: { items: [] } }
     );
@@ -107,12 +97,10 @@ export async function POST(req: NextRequest) {
       { success: true, orderId: order._id },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Something went wrong";
-
+  } catch (error: any) {
+    console.error("ORDER_API_ERROR:", error);
     return NextResponse.json(
-      { error: message },
+      { error: error.message || "Internal Server Error" },
       { status: 500 }
     );
   }
