@@ -1,33 +1,13 @@
 import Link from "next/link";
 import AdminBooksTable from "@/components/admin/AdminBooksTable";
+import { connectDB } from "@/lib/db";
+import Book from "@/models/Book";
 
 async function getBooks() {
   try {
-    // ✅ RELATIVE fetch — works correctly in Vercel SSR
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      process.env.APP_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-
-    const res = await fetch(`${baseUrl}/api/books`, {
-      cache: "no-store",
-    });
-
-    // ❗ If API failed or redirected, do NOT parse JSON
-    if (!res.ok) {
-      console.error("AdminBooks fetch failed:", res.status, res.statusText);
-      return [];
-    }
-
-    // ❗ Extra safety: ensure JSON parsing doesn't crash SSR
-    const text = await res.text();
-    try {
-      const data = JSON.parse(text);
-      return Array.isArray(data?.data) ? data.data : [];
-    } catch (err) {
-      console.error("Invalid JSON from /api/books:", text);
-      return [];
-    }
+    await connectDB();
+    const rawBooks = await Book.find({}).sort({ createdAt: -1 }).lean();
+    return JSON.parse(JSON.stringify(rawBooks));
   } catch (error) {
     console.error("AdminBooks SSR error:", error);
     return [];
