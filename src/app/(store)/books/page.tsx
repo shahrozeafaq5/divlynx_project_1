@@ -15,28 +15,34 @@ type Props = {
 };
 
 export default async function BooksPage({ searchParams }: Props) {
-  await connectDB();
+  let books: any[] = [];
 
-  const { q, category, sort } = await searchParams;
-  const query: any = {};
+  try {
+    await connectDB();
 
-  if (q) {
-    query.$or = [
-      { title: { $regex: q, $options: "i" } },
-      { author: { $regex: q, $options: "i" } },
-    ];
+    const { q, category, sort } = await searchParams;
+    const query: any = {};
+
+    if (q) {
+      query.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { author: { $regex: q, $options: "i" } },
+      ];
+    }
+
+    if (category && category !== "All") {
+      query.category = category.toLowerCase();
+    }
+
+    let sortQuery: any = { createdAt: -1 };
+    if (sort === "price") sortQuery = { price: 1 };
+    if (sort === "latest") sortQuery = { createdAt: -1 };
+
+    const rawBooks = await Book.find(query).sort(sortQuery).lean();
+    books = JSON.parse(JSON.stringify(rawBooks));
+  } catch (error) {
+    console.error("BooksPage SSR error:", error);
   }
-
-  if (category && category !== "All") {
-    query.category = category.toLowerCase();
-  }
-
-  let sortQuery: any = { createdAt: -1 };
-  if (sort === "price") sortQuery = { price: 1 };
-  if (sort === "latest") sortQuery = { createdAt: -1 };
-
-  const rawBooks = await Book.find(query).sort(sortQuery).lean();
-  const books = JSON.parse(JSON.stringify(rawBooks));
 
   return (
     <div className="min-h-screen relative">

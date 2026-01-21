@@ -10,27 +10,28 @@ interface Props {
 }
 
 export default async function BookDetailPage({ params }: Props) {
-  await connectDB();
+  try {
+    await connectDB();
 
-  const { id } = await params;
+    const { id } = await params;
 
-  const book = await Book.findById(id).lean();
-  if (!book) return notFound();
+    const book = await Book.findById(id).lean();
+    if (!book) return notFound();
 
-  const data = JSON.parse(JSON.stringify(book));
-  const bookId = data._id.toString();
+    const data = JSON.parse(JSON.stringify(book));
+    const bookId = data._id.toString();
 
-  // ✅ RELATED BOOKS (same category, exclude current)
-  const relatedRaw = await Book.find({
+    // ✅ RELATED BOOKS (same category, exclude current)
+    const relatedRaw = await Book.find({
     category: data.category,
     _id: { $ne: data._id },
-  })
+    })
     .limit(4)
     .lean();
 
-  const relatedBooks = JSON.parse(JSON.stringify(relatedRaw));
+    const relatedBooks = JSON.parse(JSON.stringify(relatedRaw));
 
-  return (
+    return (
     <div className="max-w-[1100px] mx-auto min-h-[85vh] py-20 px-4">
 
       {/* ─── MAIN BOOK SECTION ─── */}
@@ -115,5 +116,9 @@ export default async function BookDetailPage({ params }: Props) {
         </section>
       )}
     </div>
-  );
+    );
+  } catch (error) {
+    console.error("BookDetailPage SSR error:", error);
+    return notFound();
+  }
 }

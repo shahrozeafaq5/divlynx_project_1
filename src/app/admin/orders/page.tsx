@@ -5,14 +5,20 @@ import "@/models/User";
 
 
 export default async function AdminOrdersPage() {
-  await connectDB();
-  
-  const orders = await Order.find({})
-    .populate("user", "email")
-    .populate("items.book", "title")
-    .sort({ createdAt: -1 });
+  let serializedOrders: any[] = [];
 
-  const serializedOrders = JSON.parse(JSON.stringify(orders));
+  try {
+    await connectDB();
+
+    const orders = await Order.find({})
+      .populate("user", "email")
+      .populate("items.book", "title")
+      .sort({ createdAt: -1 });
+
+    serializedOrders = JSON.parse(JSON.stringify(orders));
+  } catch (error) {
+    console.error("AdminOrdersPage SSR error:", error);
+  }
 
   return (
     <div className="space-y-6 p-6">

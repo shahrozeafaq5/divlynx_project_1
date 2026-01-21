@@ -9,34 +9,39 @@ import { redirect } from "next/navigation";
 import CartItemsClient from "@/components/cart/CartItemsClient";
 
 async function getCart() {
-  await connectDB();
+  try {
+    await connectDB();
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
 
-  if (!token) return { items: null, isAuthed: false };
+    if (!token) return { items: null, isAuthed: false };
 
-  const payload = await verifyToken(token);
-  if (!payload) return { items: null, isAuthed: false };
+    const payload = await verifyToken(token);
+    if (!payload) return { items: null, isAuthed: false };
 
-  const cart = await Cart.findOne({ user: payload.id })
-    .populate("items.book")
-    .lean();
+    const cart = await Cart.findOne({ user: payload.id })
+      .populate("items.book")
+      .lean();
 
-  if (!cart) return { items: [], isAuthed: true };
+    if (!cart) return { items: [], isAuthed: true };
 
-  // ✅ MANUAL SERIALIZATION (CRITICAL FIX)
-  const serializedItems = cart.items.map((item: any) => ({
-    quantity: item.quantity,
-    book: {
-      _id: item.book._id.toString(),
-      title: item.book.title,
-      price: item.book.price,
-      image: item.book.image || "",
-    },
-  }));
+    // Manual serialization for client props.
+    const serializedItems = cart.items.map((item: any) => ({
+      quantity: item.quantity,
+      book: {
+        _id: item.book._id.toString(),
+        title: item.book.title,
+        price: item.book.price,
+        image: item.book.image || "",
+      },
+    }));
 
-  return { items: serializedItems, isAuthed: true };
+    return { items: serializedItems, isAuthed: true };
+  } catch (error) {
+    console.error("CartPage SSR error:", error);
+    return { items: [], isAuthed: true };
+  }
 }
 
 export default async function CartPage() {

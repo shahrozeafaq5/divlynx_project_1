@@ -30,30 +30,35 @@ type OrderDetail = {
 };
 
 async function getOrder(id: string): Promise<OrderDetail | null> {
-  await connectDB();
+  try {
+    await connectDB();
 
-  const cookieStore = await cookies(); // Await cookies for Next.js 16
-  const token = cookieStore.get("token")?.value;
-  if (!token) return null;
+    const cookieStore = await cookies(); // Await cookies for Next.js 16
+    const token = cookieStore.get("token")?.value;
+    if (!token) return null;
 
-  const payload = await verifyToken(token);
-  if (!payload) return null;
+    const payload = await verifyToken(token);
+    if (!payload) return null;
 
-  const order = await Order.findById(id)
-    .populate("items.book")
-    .lean();
+    const order = await Order.findById(id)
+      .populate("items.book")
+      .lean();
 
-  if (!order) return null;
+    if (!order) return null;
 
-  // 🔐 Security: User can only view own order unless admin
-  if (
-    order.user.toString() !== payload.id &&
-    payload.role !== "admin"
-  ) {
+    // dY"? Security: User can only view own order unless admin
+    if (
+      order.user.toString() !== payload.id &&
+      payload.role !== "admin"
+    ) {
+      return null;
+    }
+
+    return order as unknown as OrderDetail;
+  } catch (error) {
+    console.error("OrderDetailPage SSR error:", error);
     return null;
   }
-
-  return order as unknown as OrderDetail;
 }
 
 export default async function OrderDetailPage({

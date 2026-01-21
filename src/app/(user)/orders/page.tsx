@@ -9,18 +9,23 @@ import { redirect } from "next/navigation";
 import Image from "next/image"; // ✅ Import Image
 
 async function getOrders() {
-  await connectDB();
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("token")?.value;
+  try {
+    await connectDB();
+    const cookieStore = cookies();
+    const token = (await cookieStore).get("token")?.value;
 
-  if (!token) return null;
-  const payload = await verifyToken(token);
-  if (!payload) return null;
+    if (!token) return null;
+    const payload = await verifyToken(token);
+    if (!payload) return null;
 
-  return await Order.find({ user: payload.id })
-    .populate("items.book")
-    .sort({ createdAt: -1 })
-    .lean();
+    return await Order.find({ user: payload.id })
+      .populate("items.book")
+      .sort({ createdAt: -1 })
+      .lean();
+  } catch (error) {
+    console.error("OrdersPage SSR error:", error);
+    return [];
+  }
 }
 
 export default async function OrdersPage() {
