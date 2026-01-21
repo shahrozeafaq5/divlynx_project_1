@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 import { connectDB } from "@/lib/db";
 import Order from "@/models/Order";
 import User from "@/models/User"; // Register User
@@ -6,11 +9,8 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth.token";
 
 import { notFound } from "next/navigation";
-import { Types } from "mongoose";
+import { Types, Model } from "mongoose"; // 1. Added Model import
 import OrderStatusAdmin from "@/components/order/OrderStatusAdmin";
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 
 /* ─── TYPES ─── */
 type OrderItem = {
@@ -34,23 +34,24 @@ type OrderDetail = {
 
 async function getOrder(id: string): Promise<OrderDetail | null> {
   try {
-    const conn = await connectDB();
-    if (!conn) return null;
+    await connectDB();
 
-    const cookieStore = await cookies(); // Await cookies for Next.js 16
+    // 2. Await cookies() for Next.js 15+
+    const cookieStore = await cookies(); 
     const token = cookieStore.get("token")?.value;
     if (!token) return null;
 
     const payload = await verifyToken(token);
-    if (!payload) return null;
+    if (!payload || !payload.id) return null;
 
-    const order = await Order.findById(id)
+    // 3. Cast Order to Model<any> to fix the "not callable" TS error
+    const order = await (Order as Model<any>).findById(id)
       .populate("items.book")
       .lean();
 
     if (!order) return null;
 
-    // dY"? Security: User can only view own order unless admin
+    // Security: User can only view own order unless admin
     if (
       order.user.toString() !== payload.id &&
       payload.role !== "admin"
@@ -58,7 +59,8 @@ async function getOrder(id: string): Promise<OrderDetail | null> {
       return null;
     }
 
-    return order as unknown as OrderDetail;
+    // 4. Serialize the data to avoid "non-serializable" errors in Client Components
+    return JSON.parse(JSON.stringify(order)) as OrderDetail;
   } catch (error) {
     console.error("OrderDetailPage SSR error:", error);
     return null;
@@ -68,9 +70,10 @@ async function getOrder(id: string): Promise<OrderDetail | null> {
 export default async function OrderDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>; // Typed as Promise
+  params: Promise<{ id: string }>; // Correctly typed as Promise for Next.js 15
 }) {
-  const { id } = await params; // Await params before use
+  // 5. Await params before use
+  const { id } = await params; 
   const order = await getOrder(id);
 
   if (!order) {
@@ -110,9 +113,13 @@ export default async function OrderDetailPage({
         {order.items.map((item, i) => (
           <div key={i} className="flex justify-between items-center border-b border-[#8B6F47]/10 pb-6">
             <div className="flex items-center gap-6">
-              <div className="w-14 h-20 bg-[#EAE7E0] border border-[#8B6F47]/10 overflow-hidden">
+              <div className="w-14 h-20 bg-[#EAE7E0] border border-[#8B6F47]/10 overflow-hidden relative">
                 {item.book?.image && (
-                  <img src={item.book.image} className="object-cover w-full h-full grayscale hover:grayscale-0 transition-all" alt={item.book.title} />
+                  <img 
+                    src={item.book.image} 
+                    className="object-cover w-full h-full grayscale hover:grayscale-0 transition-all" 
+                    alt={item.book.title} 
+                  />
                 )}
               </div>
               <div>
