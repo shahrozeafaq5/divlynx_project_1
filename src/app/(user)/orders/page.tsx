@@ -1,32 +1,35 @@
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 import { connectDB } from "@/lib/db";
 import Order from "@/models/Order";
-import "@/models/Book"; 
+import "@/models/Book"; // Ensures the Book model is registered for population
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth.token";
+import { Model } from "mongoose"; // 1. Import Model from mongoose
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import Image from "next/image"; // ✅ Import Image
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
+import Image from "next/image";
 
 async function getOrders() {
   try {
-    const conn = await connectDB();
-    if (!conn) return [];
+    await connectDB();
 
-    const cookieStore = cookies();
-    const token = (await cookieStore).get("token")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
 
     if (!token) return null;
     const payload = await verifyToken(token);
-    if (!payload) return null;
+    if (!payload || !payload.id) return null;
 
-    return await Order.find({ user: payload.id })
+    // 2. Cast Order to Model<any> to fix the "user does not exist" TS error
+    const rawOrders = await (Order as Model<any>).find({ user: payload.id })
       .populate("items.book")
       .sort({ createdAt: -1 })
       .lean();
+    
+    return JSON.parse(JSON.stringify(rawOrders));
   } catch (error) {
     console.error("OrdersPage SSR error:", error);
     return [];
@@ -36,7 +39,7 @@ async function getOrders() {
 export default async function OrdersPage() {
   const orders = await getOrders();
 
-  if (!orders) {
+  if (orders === null) {
     redirect("/login");
   }
 
@@ -52,9 +55,7 @@ export default async function OrdersPage() {
           className="object-cover opacity-[0.06] grayscale sepia-[25%]"
           priority
         />
-        {/* Paper Texture Overlay */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-[0.12]" />
-        {/* Soft Vignette to focus center content */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#FDFCF8_100%)]" />
       </div>
 
@@ -77,7 +78,7 @@ export default async function OrdersPage() {
           </div>
         </header>
 
-        {!orders || orders.length === 0 ? (
+        {orders.length === 0 ? (
           <div className="py-32 text-center border border-dashed border-[#8B6F47]/20 rounded-sm bg-[#8B6F47]/5 backdrop-blur-[2px]">
             <span className="font-scripture text-5xl text-[#8B6F47]/20 mb-6 block">❦</span>
             <p className="font-serif italic text-xl text-[#8B6F47]/60 mb-8">
@@ -106,17 +107,9 @@ export default async function OrdersPage() {
                       <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#8B6F47] mb-1">
                         Archive ID
                       </p>
-
                       <p className="font-mono text-[11px] text-[#2B2A28] opacity-80 uppercase">
                         {order._id.toString()}
                       </p>
-
-                      <Link
-                        href={`/order/${order._id.toString()}`}
-                        className="mt-2 inline-block text-[10px] font-bold uppercase tracking-[0.3em] text-[#8B6F47] hover:text-[#2B2A28] transition-colors"
-                      >
-                        View Record
-                      </Link>
                     </div>
                   </div>
                   
@@ -147,7 +140,7 @@ export default async function OrdersPage() {
                   ))}
                 </div>
 
-                {/* Footer / Total Section */}
+                {/* Ledger Total Footer */}
                 <div className="mt-10 pt-8 flex justify-between items-end bg-[#8B6F47]/5 p-8 rounded-sm backdrop-blur-[4px] border border-[#8B6F47]/10">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#8B6F47] mb-2">
