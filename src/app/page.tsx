@@ -140,33 +140,40 @@ export default function HomePage() {
       </section>
 
       {/* ─── SECTION 3: THE LIBRARIAN'S CHOICE ─── */}
-      <section className="relative z-10 py-60 px-8 md:px-24 overflow-hidden bg-[#FDFCF8]">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=2940&auto=format&fit=crop"
-            alt="Study Aesthetic"
-            fill
-            className="object-cover opacity-30 grayscale-[30%] sepia-[10%]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF8]/95 via-[#FDFCF8]/60 to-[#FDFCF8]" />
-        </div>
+     <section className="relative z-10 py-24 md:py-60 px-6 md:px-24 overflow-hidden bg-[#FDFCF8]">
+  <div className="absolute inset-0 z-0">
+    <Image
+      src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=2940&auto=format&fit=crop"
+      alt="Study Aesthetic"
+      fill
+      // added priority since this is a major visual section
+      priority 
+      className="object-cover opacity-30 grayscale-[30%] sepia-[10%]"
+    />
+    <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF8]/95 via-[#FDFCF8]/60 to-[#FDFCF8]" />
+  </div>
 
-        <motion.div 
-          whileInView={{ opacity: 1 }}
-          initial={{ opacity: 0 }}
-          transition={{ duration: 2 }}
-          className="max-w-4xl mx-auto text-center relative z-20"
-        >
-          <span className="font-scripture text-5xl text-[#8B6F47]/30 block mb-8">❦</span>
-          <h3 className="font-serif italic text-5xl md:text-8xl text-[#2B2A28] mb-12 tracking-tighter drop-shadow-sm">
-            Curated with <br /> Intent.
-          </h3>
-          <p className="text-xl font-serif italic text-[#3D3B38] leading-relaxed mb-16 px-12 drop-shadow-sm">
-            "In the digital age, the act of physical reading is a quiet rebellion. We provide the tools for that rebellion."
-          </p>
-          <div className="h-px w-24 bg-[#8B6F47]/40 mx-auto" />
-        </motion.div>
-      </section>
+  <motion.div 
+    whileInView={{ opacity: 1 }}
+    initial={{ opacity: 0 }}
+    transition={{ duration: 2 }}
+    className="max-w-4xl mx-auto text-center relative z-20"
+  >
+    <span className="font-scripture text-4xl md:text-5xl text-[#8B6F47]/30 block mb-6 md:mb-8">❦</span>
+    
+    {/* Responsive text size: 4xl on mobile, 8xl on desktop */}
+    <h3 className="font-serif italic text-4xl md:text-8xl text-[#2B2A28] mb-8 md:mb-12 tracking-tighter drop-shadow-sm leading-[1.1]">
+      Curated with <br /> Intent.
+    </h3>
+    
+    {/* Removed px-12 on mobile to give text room to breathe */}
+    <p className="text-lg md:text-xl font-serif italic text-[#3D3B38] leading-relaxed mb-12 md:mb-16 px-4 md:px-12 drop-shadow-sm">
+      &ldquo;In the digital age, the act of physical reading is a quiet rebellion. We provide the tools for that rebellion.&rdquo;
+    </p>
+    
+    <div className="h-px w-20 md:w-24 bg-[#8B6F47]/40 mx-auto" />
+  </motion.div>
+</section>
 
       {/* ─── SECTION 4: CONTACT & MEMBERSHIP ─── */}
       <section className="relative z-10 bg-[#1a1918] py-32 px-8 md:px-24 overflow-hidden">
